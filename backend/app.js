@@ -11,7 +11,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // This is because Vue and Express run on two different ports
+    origin: "http://vercel-web-dev-project.vercel.app:3000", // This is because Vue and Express run on two different ports
     credentials: true,
   })
 );
@@ -55,7 +55,7 @@ app.get("/api/callback", async (req, res) => {
   // console.log(req.query)
   // console.log(req.session)
   const code = req.query.code;
-  if (!code) return res.redirect("http://localhost:3000/?error=login_failed");
+  if (!code) return res.redirect("http://vercel-web-dev-project.vercel.app:3000/?error=login_failed");
 
   try {
     const response = await axios.post(
@@ -72,13 +72,13 @@ app.get("/api/callback", async (req, res) => {
     req.session.access_token = response.data.access_token;
     // console.log(response.data)
     req.session.refresh_token = response.data.refresh_token;
-    res.redirect("http://localhost:3000/hof");
+    res.redirect("http://vercel-web-dev-project.vercel.app:3000/hof");
   } catch (error) {
     console.error(
       "Error getting tokens:",
       error.response ? error.response.data : error
     );
-    res.redirect("http://localhost:3000/?error=token_error");
+    res.redirect("http://vercel-web-dev-project.vercel.app:3000/?error=token_error");
   }
 });
 
@@ -237,7 +237,7 @@ app.get("/api/logout", (req, res) => {
     if (err) {
       return res.status(500).send("Failed to destroy session");
     }
-    res.redirect("http://localhost:3000/");
+    res.redirect("http://vercel-web-dev-project.vercel.app:3000/");
   });
 });
 
@@ -325,5 +325,5 @@ app.get("/api/artist/:id/albums", async (req, res) => {
 });
 
 app.listen(process.env.PORT || port, () => {
-  console.log(`App is listening on port: ${port}, http://localhost:${port}`);
+  console.log(`App is listening on port: ${port}, http://vercel-web-dev-project.vercel.app:${port}`);
 });

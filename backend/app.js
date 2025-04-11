@@ -67,7 +67,7 @@ app.use(express.json());
 //   })
 // );
 
-let redisStore = new RedisStore({
+let redisStore = RedisStore({
   client: redisClient,
   prefix: "myapp:",
 })

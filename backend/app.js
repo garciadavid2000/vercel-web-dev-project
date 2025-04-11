@@ -11,7 +11,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "http://vercel-web-dev-project-t1hb.vercel.app", // This is because Vue and Express run on two different ports
+    origin: "http://vercel-web-dev-project.vercel.app", // This is because Vue and Express run on two different ports
     credentials: true,
   })
 );

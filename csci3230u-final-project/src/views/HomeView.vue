@@ -2,7 +2,7 @@
 import LoginButton from "@/components/LoginButton.vue";
 
 function handleLogin() {
-  window.location.href = "/api/login";
+  window.location.href = "https://vercel-web-dev-project.vercel.app/api/login";
 }
 </script>
 

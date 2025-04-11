@@ -7,7 +7,16 @@ const querystring = require("querystring");
 const app = express();
 const port = 3000;
 const RedisStore = require("connect-redis").default;
-const redisClient = require('./redis');
+// const redisClient = require('./redis');
+const { createClient } = require('redis');
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+  // password: process.env.REDIS_PASSWORD, // if needed
+});
+
+redisClient.on('error', (err) => console.error('Redis error:', err));
+redisClient.connect();
 
 app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
 

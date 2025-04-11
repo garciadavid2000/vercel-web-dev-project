@@ -60,13 +60,15 @@ app.use(express.json());
 
 app.use(
   session({
-    store: new (require('connect-redis')(session))({
-      client: redisClient,
-    }),
-    secret: process.env.SESSION_SECRET, // Replace with a secure secret
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // Set to true for HTTPS
+    saveUninitialized: false,
+    cookie: {
+      sameSite: "none",
+      secure: true, // must be true for cookies over HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
   })
 );
 

@@ -6,14 +6,14 @@ const apiClient = axios.create({
   baseURL: 'https://vercel-web-dev-project.vercel.app/api',
   // credentials are not included in the request
   // This is useful for cross-origin requests where credentials are not needed.
-  withCredentials: true,
+  withCredentials: false,
   // headers are set to accept and send JSON data
-  // headers: {
-  //   // The 'Accept' header indicates the type of content the client can process.
-  //   Accept: 'application/json',
-  //   // The 'Content-Type' header indicates the type of content being sent to the server.
-  //   'Content-Type': 'application/json',
-  // }
+  headers: {
+    // The 'Accept' header indicates the type of content the client can process.
+    Accept: 'application/json',
+    // The 'Content-Type' header indicates the type of content being sent to the server.
+    'Content-Type': 'application/json',
+  }
 })
 
 // Main value that will be exported when this file is imported elsewhere.

@@ -41,11 +41,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // app.set('views', path.join(__dirname, 'views'));
 
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      secure: true,         // ensures the cookie is only used over HTTPS; Vercel uses HTTPS by default
+      sameSite: 'none',       // allows cross-site cookies; important when backend and frontend are on different domains/subdomains
+    },
   })
 );
 

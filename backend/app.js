@@ -11,30 +11,30 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "http://vercel-web-dev-project.vercel.app:3000", // This is because Vue and Express run on two different ports
+    origin: "http://vercel-web-dev-project-t1hb.vercel.app", // This is because Vue and Express run on two different ports
     credentials: true,
   })
 );
 
-// Serve static files from the "dist" folder
-app.use(express.static(path.join(__dirname, 'wwwroot')));
+// // Serve static files from the "dist" folder
+// app.use(express.static(path.join(__dirname, 'wwwroot')));
 
-// For SPA routing: route all other requests to index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'wwwroot', 'index.html'));
-});
+// // For SPA routing: route all other requests to index.html
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'wwwroot', 'index.html'));
+// });
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-// app.set('views', path.join(__dirname, 'views'));
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// // app.set('views', path.join(__dirname, 'views'));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
@@ -51,11 +51,19 @@ app.get("/api/login", (req, res) => {
   res.redirect(`${SPOTIFY_AUTH_URL}?${params}`);
 });
 
+app.get('/', (req, res) => {
+  res.send('Hello World')
+})
+
+app.get('/test', (req, res) => {
+  res.send('About route 🎉 ')
+})
+
 app.get("/api/callback", async (req, res) => {
   // console.log(req.query)
   // console.log(req.session)
   const code = req.query.code;
-  if (!code) return res.redirect("http://vercel-web-dev-project.vercel.app:3000/?error=login_failed");
+  if (!code) return res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/?error=login_failed");
 
   try {
     const response = await axios.post(
@@ -72,13 +80,13 @@ app.get("/api/callback", async (req, res) => {
     req.session.access_token = response.data.access_token;
     // console.log(response.data)
     req.session.refresh_token = response.data.refresh_token;
-    res.redirect("http://vercel-web-dev-project.vercel.app:3000/hof");
+    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/hof");
   } catch (error) {
     console.error(
       "Error getting tokens:",
       error.response ? error.response.data : error
     );
-    res.redirect("http://vercel-web-dev-project.vercel.app:3000/?error=token_error");
+    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/?error=token_error");
   }
 });
 
@@ -237,7 +245,7 @@ app.get("/api/logout", (req, res) => {
     if (err) {
       return res.status(500).send("Failed to destroy session");
     }
-    res.redirect("http://vercel-web-dev-project.vercel.app:3000/");
+    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/");
   });
 });
 

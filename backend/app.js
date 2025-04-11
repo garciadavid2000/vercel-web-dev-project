@@ -53,10 +53,6 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: {
-      secure: true,         // ensures the cookie is only used over HTTPS; Vercel uses HTTPS by default
-      sameSite: 'none',       // allows cross-site cookies; important when backend and frontend are on different domains/subdomains
-    },
   })
 );
 

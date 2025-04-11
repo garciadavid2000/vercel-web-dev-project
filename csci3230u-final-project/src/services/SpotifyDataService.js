@@ -3,7 +3,7 @@ import axios from 'axios'
 // Single Axios instance for our app.
 const apiClient = axios.create({
   // The base URL for all API calls to use.
-  baseURL: 'http://vercel-web-dev-project.vercel.app/api',
+  baseURL: 'https://vercel-web-dev-project.vercel.app/api',
   // credentials are not included in the request
   // This is useful for cross-origin requests where credentials are not needed.
   withCredentials: true,

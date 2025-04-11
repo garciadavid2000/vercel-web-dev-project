@@ -63,7 +63,7 @@ app.get("/api/callback", async (req, res) => {
   // console.log(req.query)
   // console.log(req.session)
   const code = req.query.code;
-  if (!code) return res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/?error=login_failed");
+  if (!code) return res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/?error=login_failed");
 
   try {
     const response = await axios.post(
@@ -82,13 +82,13 @@ app.get("/api/callback", async (req, res) => {
     req.session.access_token = response.data.access_token;
     // console.log(response.data)
     req.session.refresh_token = response.data.refresh_token;
-    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/hof");
+    res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/hof");
   } catch (error) {
     console.error(
       "Error getting tokens:",
       error.response ? error.response.data : error
     );
-    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/?error=token_error");
+    res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/?error=token_error");
   }
 });
 
@@ -247,7 +247,7 @@ app.get("/api/logout", (req, res) => {
     if (err) {
       return res.status(500).send("Failed to destroy session");
     }
-    res.redirect("http://vercel-web-dev-project-t1hb.vercel.app/");
+    res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/");
   });
 });
 
@@ -335,5 +335,5 @@ app.get("/api/artist/:id/albums", async (req, res) => {
 });
 
 app.listen(process.env.PORT || port, () => {
-  console.log(`App is listening on port: ${port}, http://vercel-web-dev-project.vercel.app:${port}`);
+  console.log(`App is listening on port: ${port}, https://vercel-web-dev-project.vercel.app:${port}`);
 });

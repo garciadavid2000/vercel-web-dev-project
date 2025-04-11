@@ -6,6 +6,7 @@ const session = require("express-session");
 const querystring = require("querystring");
 const app = express();
 const port = 3000;
+const redis = require('redis');
 
 app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
 

@@ -385,3 +385,5 @@ app.get("/api/artist/:id/albums", async (req, res) => {
 app.listen(process.env.PORT || port, () => {
   console.log(`App is listening on port: ${port}, https://vercel-web-dev-project.vercel.app:${port}`);
 });
+
+module.exports = app;

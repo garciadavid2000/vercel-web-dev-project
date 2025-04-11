@@ -6,7 +6,7 @@ const session = require("express-session");
 const querystring = require("querystring");
 const app = express();
 const port = 3000;
-const redis = require('redis');
+const redisClient = require('./redis');
 
 app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
 
@@ -44,16 +44,29 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
+// app.use(
+//   session({
+
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       sameSite: "none",
+//       secure: true,
+//       maxAge: 24 * 60 * 60 * 1000, // 1 day
+//     },
+//   })
+// );
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    store: new (require('connect-redis')(session))({
+      client: redisClient,
+    }),
+    secret: process.env.SESSION_SECRET, // Replace with a secure secret
     resave: false,
-    saveUninitialized: false,
-    cookie: {
-      sameSite: "none",
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
+    saveUninitialized: true,
+    cookie: { secure: false }, // Set to true for HTTPS
   })
 );
 

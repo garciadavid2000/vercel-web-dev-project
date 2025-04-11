@@ -7,6 +7,8 @@ const querystring = require("querystring");
 const app = express();
 const port = 3000;
 
+app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
+
 const cors = require("cors");
 
 app.use(
@@ -41,6 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // app.set('views', path.join(__dirname, 'views'));
 
+
 // app.use(
 //   session({
 //     secret: process.env.SESSION_SECRET,
@@ -48,11 +51,16 @@ app.use(express.json());
 //     saveUninitialized: true,
 //   })
 // );
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: {
+      sameSite: "none",
+      secure: true,
+    },
   })
 );
 

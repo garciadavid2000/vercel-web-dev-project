@@ -13,7 +13,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "https://vercel-web-dev-project-t1hb.vercel.app", // This is because Vue and Express run on two different ports
+    origin: ["https://vercel-web-dev-project.vercel.app","https://vercel-web-dev-project-t1hb.vercel.app"], // This is because Vue and Express run on two different ports
     credentials: true,
   })
 );
@@ -41,16 +41,7 @@ app.use(
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// app.set('views', path.join(__dirname, 'views'));
 
-
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
 
 app.use(
   session({

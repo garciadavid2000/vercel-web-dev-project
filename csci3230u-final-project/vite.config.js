@@ -18,7 +18,7 @@ export default defineConfig({
     // port: 5173,       // Explicitly set the port
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',  // Use backend service name in Docker
+        target: 'https://vercel-web-dev-project.vercel.app',  // Use backend service name in Docker
         changeOrigin: true,
         secure: false,
       },

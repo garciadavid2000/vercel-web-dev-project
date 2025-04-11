@@ -6,17 +6,16 @@ const session = require("express-session");
 const querystring = require("querystring");
 const app = express();
 const port = 3000;
-const RedisStore = require("connect-redis").default;
+const RedisStore = require("connect-redis");
 // const redisClient = require('./redis');
 const { createClient } = require('redis');
 
-const redisClient = createClient({
+let redisClient = createClient({
   url: process.env.REDIS_URL,
   // password: process.env.REDIS_PASSWORD, // if needed
 });
 
-redisClient.on('error', (err) => console.error('Redis error:', err));
-redisClient.connect();
+redisClient.connect().catch(err => console.error('Redis connection error:', err));
 
 app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
 
@@ -68,9 +67,14 @@ app.use(express.json());
 //   })
 // );
 
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "myapp:",
+})
+
 app.use(
   session({
-    store: RedisStore({ client: redisClient }),
+    store: redisStore,
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,

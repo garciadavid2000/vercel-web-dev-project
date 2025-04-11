@@ -77,6 +77,8 @@ app.get("/api/callback", async (req, res) => {
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
+    console.log(response.data);
+    console.log(req.session);
     req.session.access_token = response.data.access_token;
     // console.log(response.data)
     req.session.refresh_token = response.data.refresh_token;

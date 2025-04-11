@@ -55,17 +55,17 @@ redisClient.connect().catch(console.error);
 
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      sameSite: "none",
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
-
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_URL = "https://api.spotify.com/v1";

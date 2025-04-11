@@ -6,8 +6,6 @@ const session = require("express-session");
 const querystring = require("querystring");
 const app = express();
 const port = 3000;
-const RedisStore = require('connect-redis')(session);
-const { createClient } = 'redis';
 
 app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
 
@@ -45,27 +43,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
-let redisClient = createClient({
-  url: process.env.REDIS_URL, // or local dev url
-  legacyMode: true
-});
-redisClient.connect().catch(console.error);
-
-
-
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
       sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
 );
+
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_URL = "https://api.spotify.com/v1";

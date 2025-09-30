@@ -69,12 +69,14 @@ app.get("/api/callback", async (req, res) => {
       secure: true,
       sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
+      domain: '.vercel.app'
     });
     res.cookie("refresh_token", response.data.refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      domain: '.vercel.app'
     });
     res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/hof");
   } catch (error) {

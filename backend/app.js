@@ -2,89 +2,27 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const axios = require("axios");
-const session = require("express-session");
 const querystring = require("querystring");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = 3000;
-const RedisStore = require("connect-redis");
-// const redisClient = require('./redis');
-const { createClient } = require('redis');
 
-let redisClient = createClient({
-  url: process.env.REDIS_URL,
-  // password: process.env.REDIS_PASSWORD, // if needed
-});
-
-redisClient.connect().catch(err => console.error('Redis connection error:', err));
-
-app.set("trust proxy", 1); // <-- Important for secure cookies on Vercel
-
-const cors = require("cors");
+app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: ["https://vercel-web-dev-project.vercel.app","https://vercel-web-dev-project-t1hb.vercel.app"], // This is because Vue and Express run on two different ports
+    origin: [
+      "https://vercel-web-dev-project.vercel.app",
+      "https://vercel-web-dev-project-t1hb.vercel.app"
+    ],
     credentials: true,
   })
 );
 
-// // Serve static files from the "dist" folder
-// app.use(express.static(path.join(__dirname, 'wwwroot')));
-
-// // For SPA routing: route all other requests to index.html
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'wwwroot', 'index.html'));
-// });
-
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
-// // app.set('views', path.join(__dirname, 'views'));
-
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
-
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-
-// app.use(
-//   session({
-
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: {
-//       sameSite: "none",
-//       secure: true,
-//       maxAge: 24 * 60 * 60 * 1000, // 1 day
-//     },
-//   })
-// );
-
-let redisStore = RedisStore({
-  client: redisClient,
-  prefix: "myapp:",
-})
-
-app.use(
-  session({
-    store: redisStore,
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      sameSite: "none",
-      secure: true, // must be true for cookies over HTTPS
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
-  })
-);
+app.use(cookieParser());
 
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
@@ -110,8 +48,6 @@ app.get('/test', (req, res) => {
 })
 
 app.get("/api/callback", async (req, res) => {
-  // console.log(req.query)
-  // console.log(req.session)
   const code = req.query.code;
   if (!code) return res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/?error=login_failed");
 
@@ -127,13 +63,19 @@ app.get("/api/callback", async (req, res) => {
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
-    console.log("TEST====================")
-    console.log(response.data);
-    console.log("TEST SESSION=================")
-    console.log(req.session);
-    req.session.access_token = response.data.access_token;
-    // console.log(response.data)
-    req.session.refresh_token = response.data.refresh_token;
+    // Set access_token and refresh_token as cookies
+    res.cookie("access_token", response.data.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.cookie("refresh_token", response.data.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
     res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/hof");
   } catch (error) {
     console.error(
@@ -144,16 +86,21 @@ app.get("/api/callback", async (req, res) => {
   }
 });
 
+function getAccessToken(req) {
+  return req.cookies.access_token;
+}
+
 app.get("/api/top-tracks", async (req, res) => {
-  if (!req.session.access_token) {
+  const access_token = getAccessToken(req);
+  if (!access_token) {
     return res.status(401).json({ message: "Not authenticated" });
   }
   
-  const { limit = 5, time_range = "medium_term" } = req.query; // default values if not specified
+  const { limit = 5, time_range = "medium_term" } = req.query;
   
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/me/top/tracks`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
       params: { limit, time_range },
     });
     res.json(response.data);
@@ -163,35 +110,35 @@ app.get("/api/top-tracks", async (req, res) => {
   }
 });
 
-// Can get top generes here
 app.get("/api/top-artists", async (req, res) => {
-  if (!req.session.access_token)
+  const access_token = getAccessToken(req);
+  if (!access_token)
     return res.status(401).json({ message: "Not authenticated" });
     
-  const { limit = 5, time_range = "medium_term" } = req.query; // default values if not specified
+  const { limit = 5, time_range = "medium_term" } = req.query;
   
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/me/top/artists`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
       params: { limit, time_range },
     });
-    res.json(response.data); // return the full response
+    res.json(response.data);
   } catch (error) {
     console.error("Error fetching top artists:", error.response ? error.response.data : error);
     res.status(500).send("Error fetching top artists");
   }
 });
 
-
 app.get("/api/recently-played", async (req, res) => {
-  if (!req.session.access_token)
+  const access_token = getAccessToken(req);
+  if (!access_token)
     return res.status(401).json({ message: "Not authenticated" });
 
   try {
     const response = await axios.get(
       `${SPOTIFY_API_URL}/me/player/recently-played?limit=50`,
       {
-        headers: { Authorization: `Bearer ${req.session.access_token}` },
+        headers: { Authorization: `Bearer ${access_token}` },
       }
     );
     res.json(response.data);
@@ -200,16 +147,17 @@ app.get("/api/recently-played", async (req, res) => {
     res.status(500).send("Error fetching recently played tracks");
   }
 });
+
 app.get("/api/user", async (req, res) => {
-  if (!req.session.access_token) {
+  const access_token = getAccessToken(req);
+  if (!access_token) {
     return res.status(401).json({ error: "Not logged in" });
   }
 
   try {
     const response = await axios.get("https://api.spotify.com/v1/me", {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
     });
-    // console.log(response)
     res.json(response.data);
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -217,10 +165,9 @@ app.get("/api/user", async (req, res) => {
   }
 });
 
-// you can search for albums, artists, tracks etc.
-// MUST SPECIFY TYPE: "album", "artist", "playlist", "track", "show", "episode", "audiobook"
 app.get("/api/search", async (req, res) => {
-  if (!req.session.access_token)
+  const access_token = getAccessToken(req);
+  if (!access_token)
     return res.status(401).json({ message: "Not authenticated" });
 
   const { query, type } = req.query;
@@ -230,7 +177,7 @@ app.get("/api/search", async (req, res) => {
 
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/search`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
       params: {
         q: query,
         type: type,
@@ -245,12 +192,12 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-//get song information by track id
 app.get("/api/track/:id", async (req, res) => {
+  const access_token = getAccessToken(req);
   const trackId = req.params.id;
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/tracks/${trackId}`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
     });
     res.json(response.data);
   } catch (error) {
@@ -259,12 +206,12 @@ app.get("/api/track/:id", async (req, res) => {
   }
 });
 
-//get artist information by artist id
 app.get("/api/artist/:id", async (req, res) => {
+  const access_token = getAccessToken(req);
   const artistId = req.params.id;
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/artists/${artistId}`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
     });
     res.json(response.data);
   } catch (error) {
@@ -274,10 +221,11 @@ app.get("/api/artist/:id", async (req, res) => {
 });
 
 app.get("/api/artists", async (req, res) => {
+  const access_token = getAccessToken(req);
   const artistIds = req.query.ids;
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/artists`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
       params: { ids: artistIds },
     });
     res.json(response.data.artists);
@@ -295,27 +243,31 @@ app.use((err, req, res, next) => {
 });
 
 app.get("/api/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).send("Failed to destroy session");
-    }
-    res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/");
+  res.clearCookie("access_token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
   });
+  res.clearCookie("refresh_token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/");
 });
 
 app.get("/api/artist/:id/top-tracks", async (req, res) => {
+  const access_token = getAccessToken(req);
   const artistId = req.params.id;
-  // The market parameter is required by Spotify's API I left as US by default
   const market = req.query.market || "US";
   try {
     const response = await axios.get(
       `${SPOTIFY_API_URL}/artists/${artistId}/top-tracks`,
       {
-        headers: { Authorization: `Bearer ${req.session.access_token}` },
+        headers: { Authorization: `Bearer ${access_token}` },
         params: { market },
       }
     );
-    // Return the complete data, or process it if needed
     res.json(response.data);
   } catch (error) {
     console.error(
@@ -327,10 +279,11 @@ app.get("/api/artist/:id/top-tracks", async (req, res) => {
 });
 
 app.get("/api/album/:id", async (req, res) => {
+  const access_token = getAccessToken(req);
   const albumId = req.params.id;
   try {
     const response = await axios.get(`${SPOTIFY_API_URL}/albums/${albumId}`, {
-      headers: { Authorization: `Bearer ${req.session.access_token}` },
+      headers: { Authorization: `Bearer ${access_token}` },
     });
     res.json(response.data);
   } catch (error) {
@@ -343,13 +296,14 @@ app.get("/api/album/:id", async (req, res) => {
 });
 
 app.get("/api/album/:id/tracks", async (req, res) => {
+  const access_token = getAccessToken(req);
   const albumId = req.params.id;
   const { limit = 20, offset = 0, market = "US" } = req.query;
   try {
     const response = await axios.get(
       `${SPOTIFY_API_URL}/albums/${albumId}/tracks`,
       {
-        headers: { Authorization: `Bearer ${req.session.access_token}` },
+        headers: { Authorization: `Bearer ${access_token}` },
         params: { limit, offset, market },
       }
     );
@@ -364,15 +318,15 @@ app.get("/api/album/:id/tracks", async (req, res) => {
 });
 
 app.get("/api/artist/:id/albums", async (req, res) => {
+  const access_token = getAccessToken(req);
   const artistId = req.params.id;
-  // You can also accept query parameters for limit, market, and include_groups
   const { limit = 5, market = "US", include_groups = "album" } = req.query;
 
   try {
     const response = await axios.get(
       `${SPOTIFY_API_URL}/artists/${artistId}/albums`,
       {
-        headers: { Authorization: `Bearer ${req.session.access_token}` },
+        headers: { Authorization: `Bearer ${access_token}` },
         params: { limit, market, include_groups },
       }
     );

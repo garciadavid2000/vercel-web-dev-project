@@ -19,6 +19,16 @@ const apiClient = axios.create({
   }
 })
 
+// Add interceptor to set token dynamically
+apiClient.interceptors.request.use(config => {
+  const match = document.cookie.match(/(?:^|;\s*)access_token=([^;]*)/);
+  const token = match ? match[1] : '';
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Main value that will be exported when this file is imported elsewhere.
 // This is an Object that contains our method getUserEndpoint.
 // Any module that imports this file using the default import syntax will get this object.

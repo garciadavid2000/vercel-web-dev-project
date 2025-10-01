@@ -64,21 +64,22 @@ app.get("/api/callback", async (req, res) => {
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
     // Set access_token and refresh_token as cookies
-    res.cookie("access_token", response.data.access_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-      domain: ".vercel-web-dev-projec-t1hb.vercel.app"
-    });
-    res.cookie("refresh_token", response.data.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      domain: ".vercel-web-dev-project-t1hb.vercel.app"
-    });
-    res.redirect("https://vercel-web-dev-project-t1hb.vercel.app/hof");
+    // res.cookie("access_token", response.data.access_token, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   maxAge: 24 * 60 * 60 * 1000,
+    //   domain: ".vercel-web-dev-project-t1hb.vercel.app"
+    // });
+    // res.cookie("refresh_token", response.data.refresh_token, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   maxAge: 30 * 24 * 60 * 60 * 1000,
+    //   domain: ".vercel-web-dev-project-t1hb.vercel.app"
+    // });
+    res.redirect(`https://vercel-web-dev-project-t1hb.vercel.app/hof?access_token=${response.data.access_token}&refresh_token=${response.data.refresh_token}`);
+
   } catch (error) {
     console.error(
       "Error getting tokens:",

@@ -56,6 +56,19 @@ async function fetchAllData() {
 
 // On mount, load both songs and artists data with default filters.
 onMounted(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+
+  if (accessToken) {
+    // save tokens as cookies (not HttpOnly, but accessible to frontend)
+    document.cookie = `access_token=${accessToken}; path=/; SameSite=None; Secure`;
+    document.cookie = `refresh_token=${refreshToken}; path=/; SameSite=None; Secure`;
+
+    // clean up URL (remove query params so tokens aren’t exposed in history)
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   await fetchAllData();
 });
 </script>

@@ -10,6 +10,7 @@ export const useUserDataStore = defineStore('userData', () => {
     if (userData.value === null) {
       isLoading.value = true;
       try {
+        // await new Promise(resolve => setTimeout(resolve, 2000));
         const response = await SpotifyDataService.getUserEndpoint();
         userData.value = response.data;
       } catch (error) {

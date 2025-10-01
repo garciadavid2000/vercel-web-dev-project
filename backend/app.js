@@ -90,7 +90,13 @@ app.get("/api/callback", async (req, res) => {
 });
 
 function getAccessToken(req) {
-  return req.cookies.access_token;
+    const authHeader = req.headers.authorization; // case-insensitive
+  if (!authHeader) return null;
+
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") return null;
+
+  return parts[1];
 }
 
 app.get("/api/top-tracks", async (req, res) => {

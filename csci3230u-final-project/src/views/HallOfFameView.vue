@@ -60,6 +60,7 @@ onMounted(async () => {
   const accessToken = params.get("access_token");
   const refreshToken = params.get("refresh_token");
 
+  console.log(access_token)
   if (accessToken) {
     // save tokens as cookies (not HttpOnly, but accessible to frontend)
     document.cookie = `access_token=${accessToken}; path=/; SameSite=None; Secure`;

@@ -37,7 +37,7 @@ const router = createRouter({
       path: '/hof',
       name: 'hall-of-fame',
       component: HallOfFameView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     // TODO: Add top artists and top albums routes
     {
